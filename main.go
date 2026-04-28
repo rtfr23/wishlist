@@ -22,6 +22,9 @@ func main(){
 
 	secret_key := os.Getenv("SECRET_KEY")
 	authJwtMaker := token.NewJWTMaker(secret_key)
+
+	//jwtMiddleware := middleware.NewJWTMiddleware(authJwtMaker)
+
 	auth_repository := auth.NewRepository(auth_pool)
 	authService := *auth.NewService(auth_repository, authJwtMaker)
 	authHandler := auth.NewAuthHandler(ctx, &authService)

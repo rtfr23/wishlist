@@ -43,10 +43,6 @@ func (s *HTTPServer)Start(port string) error {
 	TODO:
 	endpoints
 
-	auth:
-		POST /auth/signin
-		POST /auth/signup
-	
 	wishlist:
 		closed:
 			GET /wishlists

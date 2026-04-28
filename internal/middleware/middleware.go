@@ -13,6 +13,12 @@ type JWTMiddleware struct {
 	maker *token.JWTMaker
 }
 
+func NewJWTMiddleware(maker *token.JWTMaker) *JWTMiddleware  {
+	return &JWTMiddleware{
+		maker: maker,
+	}
+}
+
 var ClaimsKey = struct{}{}
 
 func (m* JWTMiddleware)Check(h http.HandlerFunc) http.HandlerFunc{
