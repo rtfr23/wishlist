@@ -9,7 +9,7 @@ import (
 )
 
 type Service struct {
-	repository Repository
+	repository *Repository
 	jwtMaker *token.JWTMaker
 }
 
@@ -18,7 +18,7 @@ type User struct {
 	Password string
 }
 
-func NewService(rep Repository, jwtM *token.JWTMaker) *Service {
+func NewService(rep *Repository, jwtM *token.JWTMaker) *Service {
 	return &Service {
 		repository: rep,
 		jwtMaker: jwtM,

@@ -15,6 +15,14 @@ type ErrDTO struct {
 	Time time.Time
 }
 
+func (u *UserDTO)Validate() bool {
+	if u.Email == "" || u.Password == "" {
+		return false
+	}
+
+	return true
+}
+
 func NewErrorDTO(err error) ErrDTO {
 	return ErrDTO {
 		Message: err.Error(),
