@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"time"
 	"wishlist/internal/auth/token"
 
 	"golang.org/x/crypto/bcrypt"
@@ -24,16 +25,24 @@ func NewService(rep Repository, jwtM *token.JWTMaker) *Service {
 	}
 }
 
-func (s *Service)Login(ctx context.Context, user User) error {
+func (s *Service)Login(ctx context.Context, user User) (string, error) {
 	guessUser, err := s.repository.GetUser(ctx, user.Email)
+
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(guessUser.Password), []byte(user.Password)); err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	token, err := s.jwtMaker.CreateToken(user.Email, 60*time.Minute)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (s *Service)Register(ctx context.Context, user User) error {

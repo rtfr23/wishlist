@@ -1,6 +1,7 @@
 package token
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -30,4 +31,26 @@ func (m *JWTMaker) CreateToken(email string, duration time.Duration) (string, er
 	}
 
 	return signed, nil
+}
+
+func (m *JWTMaker) VerifyToken(tokenStr string) (*jwt.RegisteredClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+		if  !ok {
+			return nil, errors.New("invalid token signing method")
+		}
+		return []byte(m.secretKey), nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid token claims")
+	}
+
+	return claims, nil
 }
