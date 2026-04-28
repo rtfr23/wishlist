@@ -20,6 +20,10 @@ type HTTPHandlers struct {
 	*/
 }
 
+func NewHTTPHandlers() *HTTPHandlers {
+	return &HTTPHandlers{}
+}
+
 func NewHTTPServer(handler *HTTPHandlers) *HTTPServer{
 	return &HTTPServer {
 		httpHandler: handler,
