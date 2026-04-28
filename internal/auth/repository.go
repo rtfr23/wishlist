@@ -16,4 +16,6 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 
 func (r *Repository)InsertUser(ctx context.Context, User User){}
 
-func (r *Repository)GetUser(ctx context.Context, User User){}
+func (r *Repository)GetUser(ctx context.Context, Email string) User {
+	return User{}
+}

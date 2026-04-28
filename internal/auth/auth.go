@@ -21,7 +21,15 @@ func NewService(rep Repository) *Service {
 	}
 }
 
-func (s *Service)RegisterUser(ctx context.Context, user User) error {
+func (s *Service)Login(ctx context.Context, user User) error {
+	guessUser := s.repository.GetUser(ctx, user.Email)
+	if err := bcrypt.CompareHashAndPassword([]byte(guessUser.Password), []byte(user.Password)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Service)Register(ctx context.Context, user User) error {
 	password_hash, err := generatePassword(user.Password)
 	if err != nil {
 		return err
@@ -41,5 +49,7 @@ func generatePassword(password string) (string, error){
 
 	return string(password_hash), nil
 }
+
+
 
 
