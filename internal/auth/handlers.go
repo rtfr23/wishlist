@@ -26,6 +26,10 @@ func (h *AuthHandler) RegisterUser(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	if !new_user.Validate() {
+		http.Error(w, "Invalid email or password", http.StatusBadRequest)
+		return
+	}
 
 	user := User {
 		Email: new_user.Email,

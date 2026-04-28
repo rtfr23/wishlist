@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net/http"
+	"wishlist/internal/auth"
 
 	"github.com/gorilla/mux"
 )
@@ -14,14 +15,18 @@ type HTTPServer struct {
 type HTTPHandlers struct {
 	/*
 	TODO:
-		auth service
-		wishlist service
-		item service
+		auth handler
+		wishlist handler
+		item handler
 	*/
+
+	AuthHandler *auth.AuthHandler
 }
 
-func NewHTTPHandlers() *HTTPHandlers {
-	return &HTTPHandlers{}
+func NewHTTPHandlers(AuthHandler auth.AuthHandler) *HTTPHandlers {
+	return &HTTPHandlers{
+		AuthHandler: &AuthHandler,
+	}
 }
 
 func NewHTTPServer(handler *HTTPHandlers) *HTTPServer{
@@ -32,7 +37,7 @@ func NewHTTPServer(handler *HTTPHandlers) *HTTPServer{
 
 func (s *HTTPServer)Start(port string) error {
 	router := mux.NewRouter()
-
+	router.Path("/auth/signin").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.RegisterUser)
 	/*
 	TODO:
 	endpoints

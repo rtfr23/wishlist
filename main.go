@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"wishlist/internal/auth"
+	"wishlist/internal/auth/token"
 	"wishlist/internal/db"
 	"wishlist/internal/server"
 )
@@ -18,11 +19,14 @@ func main(){
 	}
 	defer auth_pool.Close()
 
-	auth_repository := auth.NewRepository(auth_pool)
-	
-	_ = auth_repository
 
-	httpHandlers := server.NewHTTPHandlers()
+	secret_key := os.Getenv("SECRET_KEY")
+	authJwtMaker := token.NewJWTMaker(secret_key)
+	auth_repository := auth.NewRepository(auth_pool)
+	authService := *auth.NewService(auth_repository, authJwtMaker)
+	authHandler := auth.NewAuthHandler(ctx, &authService)
+
+	httpHandlers := server.NewHTTPHandlers(*authHandler)
 	httpServer := server.NewHTTPServer(httpHandlers)
 	httpServer.Start(":8080")
 	
