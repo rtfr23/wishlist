@@ -70,7 +70,8 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request){
 	}
 
 	if !userDto.Validate() {
-		http.Error(w, "Invalid email or password", http.StatusBadRequest)
+		errDTO := dto.NewErrorDTO(errors.New("Invalid email or password"))
+		http.Error(w, errDTO.ToString(),http.StatusBadRequest)
 		return
 	}
 
