@@ -37,7 +37,8 @@ func NewHTTPServer(handler *HTTPHandlers) *HTTPServer{
 
 func (s *HTTPServer)Start(port string) error {
 	router := mux.NewRouter()
-	router.Path("/auth/signin").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.RegisterUser)
+	router.Path("/auth/signup").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.RegisterUser)
+	router.Path("/auth/signin").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.LoginUser)
 	/*
 	TODO:
 	endpoints
