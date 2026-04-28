@@ -33,7 +33,7 @@ func (s *Service)Login(ctx context.Context, user User) (string, error) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(guessUser.Password), []byte(user.Password)); err != nil {
-		return "", err
+		return "", ErrWrongPassword
 	}
 
 	token, err := s.jwtMaker.CreateToken(user.Email, 60*time.Minute)
