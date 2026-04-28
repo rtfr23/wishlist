@@ -2,12 +2,14 @@ package auth
 
 import (
 	"context"
+	"wishlist/internal/auth/token"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service struct {
 	repository Repository
+	jwtMaker *token.JWTMaker
 }
 
 type User struct {
@@ -15,9 +17,10 @@ type User struct {
 	Password string
 }
 
-func NewService(rep Repository) *Service {
+func NewService(rep Repository, jwtM *token.JWTMaker) *Service {
 	return &Service {
 		repository: rep,
+		jwtMaker: jwtM,
 	}
 }
 
@@ -55,7 +58,3 @@ func generatePassword(password string) (string, error){
 
 	return string(password_hash), nil
 }
-
-
-
-
