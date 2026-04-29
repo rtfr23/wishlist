@@ -16,7 +16,7 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{database: db,}
 }
 
-func (r *Repository)InsertWishlist(ctx context.Context, wishlist WishlistModel) error {
+func (r *Repository)InsertWishlist(ctx context.Context, wishlist Wishlist) error {
 	sqlQuery := `
 		INSERT INTO wishlists (user_id, event, description, date)
 		VALUES($1, $2, $3, $4);
@@ -25,7 +25,7 @@ func (r *Repository)InsertWishlist(ctx context.Context, wishlist WishlistModel) 
 	return err	
 }
 
-func (r *Repository)GetWishlist(ctx context.Context, wishlistId int, userId int) (WishlistModel, error) {
+func (r *Repository)SelectWishlist(ctx context.Context, wishlistId int, userId int) (Wishlist, error) {
 	sqlQuery := `
 		SELECT id, user_id, event, description, date
 		FROM wishlists
@@ -33,14 +33,14 @@ func (r *Repository)GetWishlist(ctx context.Context, wishlistId int, userId int)
 	`
 	wishlistRow := r.database.QueryRow(ctx, sqlQuery, wishlistId, userId)
 
-	var wishlist WishlistModel
+	var wishlist Wishlist
 	err := wishlistRow.Scan(&wishlist.Id, &wishlist.User_id, &wishlist.Event, &wishlist.Description, &wishlist.Date)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return WishlistModel{}, ErrWishlistNotFound
+			return Wishlist{}, ErrWishlistNotFound
 		} else {
-			return WishlistModel{}, err
+			return Wishlist{}, err
 		}
 	}	
 
@@ -48,7 +48,7 @@ func (r *Repository)GetWishlist(ctx context.Context, wishlistId int, userId int)
 }
 
 // TODO: , delete wishlist, update wishlist
-func (r *Repository)GetAllWishlists(ctx context.Context, userId int) ([]WishlistModel, error) {
+func (r *Repository)SelectAllWishlists(ctx context.Context, userId int) ([]Wishlist, error) {
 	sqlQuery := `
 		SELECT id, user_id, event, description, date
 		FROM wishlists
@@ -63,10 +63,10 @@ func (r *Repository)GetAllWishlists(ctx context.Context, userId int) ([]Wishlist
 	}
 	defer rows.Close()
 	
-	wishlists := make([]WishlistModel, 0)
+	wishlists := make([]Wishlist, 0)
 
 	for rows.Next() {
-		var wishlist WishlistModel
+		var wishlist Wishlist
 		err := rows.Scan(&wishlist.Id, &wishlist.User_id, &wishlist.Event, &wishlist.Description, &wishlist.Date)
 		if err != nil {
 			return nil, err
@@ -77,7 +77,7 @@ func (r *Repository)GetAllWishlists(ctx context.Context, userId int) ([]Wishlist
 	return wishlists, nil
 }
 
-func (r *Repository)UpdateWishlist(ctx context.Context, wishlist WishlistModel) error {
+func (r *Repository)UpdateWishlist(ctx context.Context, wishlist Wishlist) (Wishlist, error) {
 	sqlQuery := `
 		UPDATE wishlists
 		SET event = $1, description = $2, date = $3
@@ -86,12 +86,12 @@ func (r *Repository)UpdateWishlist(ctx context.Context, wishlist WishlistModel) 
 
 	res, err := r.database.Exec(ctx, sqlQuery, wishlist.Event, wishlist.Description, wishlist.Date, wishlist.Id, wishlist.User_id)
 	if err != nil {
-		return err
+		return Wishlist{}, err
 	}	
 	if res.RowsAffected() == 0 {
-		return ErrWishlistNotFound
+		return Wishlist{}, ErrWishlistNotFound
 	}
-	return nil
+	return wishlist, nil
 }
 
 func (r *Repository)DeleteWishlist(ctx context.Context, wishlistId int, userId int) error {
