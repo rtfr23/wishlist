@@ -15,6 +15,20 @@ type ErrDTO struct {
 	Time time.Time
 }
 
+type WishlistDTO struct {
+	Id int`json:"id"`
+	Event string`json:"event"`
+	Description string`json:"desc"`
+	Date *time.Time`date:"date"`
+}
+
+func(w *WishlistDTO)Validate() bool {
+	if w.Event == "" || w.Date == nil{
+		return false
+	}
+	return true
+}
+
 func (u *UserDTO)Validate() bool {
 	if u.Email == "" || u.Password == "" {
 		return false
