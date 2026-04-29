@@ -5,5 +5,5 @@ CREATE TABLE wishlists (
     description VARCHAR(1024),
     date TIMESTAMP NOT NULL,
 
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
