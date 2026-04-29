@@ -16,27 +16,28 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{database: db,}
 }
 
-func (r *Repository)InsertWishlist(ctx context.Context, wishlist Wishlist) (int, error) {
+func (r *Repository)InsertWishlist(ctx context.Context, wishlist Wishlist) (int, string, error) {
+	token := GenerateAccessToken()
 	sqlQuery := `
-		INSERT INTO wishlists (user_id, event, description, date)
-		VALUES($1, $2, $3, $4)
+		INSERT INTO wishlists (user_id, event, description, date, token)
+		VALUES($1, $2, $3, $4, $5)
 		RETURNING id;
 	`
 	var id int
-	err := r.database.QueryRow(ctx, sqlQuery, wishlist.User_id,wishlist.Event, wishlist.Description, wishlist.Date).Scan(&id)
-	return id, err	
+	err := r.database.QueryRow(ctx, sqlQuery, wishlist.User_id,wishlist.Event, wishlist.Description, wishlist.Date, token).Scan(&id)
+	return id, token, err	
 }
 
 func (r *Repository)SelectWishlist(ctx context.Context, wishlistId int, userId int) (Wishlist, error) {
 	sqlQuery := `
-		SELECT id, user_id, event, description, date
+		SELECT id, user_id, event, description, date, token
 		FROM wishlists
 		WHERE id = $1 AND user_id = $2;
 	`
 	wishlistRow := r.database.QueryRow(ctx, sqlQuery, wishlistId, userId)
 
 	var wishlist Wishlist
-	err := wishlistRow.Scan(&wishlist.Id, &wishlist.User_id, &wishlist.Event, &wishlist.Description, &wishlist.Date)
+	err := wishlistRow.Scan(&wishlist.Id, &wishlist.User_id, &wishlist.Event, &wishlist.Description, &wishlist.Date, &wishlist.Token)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -51,7 +52,7 @@ func (r *Repository)SelectWishlist(ctx context.Context, wishlistId int, userId i
 
 func (r *Repository)SelectAllWishlists(ctx context.Context, userId int) ([]Wishlist, error) {
 	sqlQuery := `
-		SELECT id, user_id, event, description, date
+		SELECT id, user_id, event, description, date, token
 		FROM wishlists
 		WHERE user_id = $1
 		ORDER BY id ASC;
@@ -68,7 +69,7 @@ func (r *Repository)SelectAllWishlists(ctx context.Context, userId int) ([]Wishl
 
 	for rows.Next() {
 		var wishlist Wishlist
-		err := rows.Scan(&wishlist.Id, &wishlist.User_id, &wishlist.Event, &wishlist.Description, &wishlist.Date)
+		err := rows.Scan(&wishlist.Id, &wishlist.User_id, &wishlist.Event, &wishlist.Description, &wishlist.Date, &wishlist.Token)
 		if err != nil {
 			return nil, err
 		}

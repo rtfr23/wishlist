@@ -15,6 +15,7 @@ type Wishlist struct {
 	Event string
 	Description string
 	Date time.Time
+	Token string
 }
 
 func NewService(rep *Repository) *Service {
@@ -23,13 +24,13 @@ func NewService(rep *Repository) *Service {
 	}
 }
 
-func (s *Service)AddWishlist(ctx context.Context, wishlist Wishlist) (int, error) {
-	id, err := s.repository.InsertWishlist(ctx, wishlist); 
+func (s *Service)AddWishlist(ctx context.Context, wishlist Wishlist) (int, string, error) {
+	id, token, err := s.repository.InsertWishlist(ctx, wishlist); 
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 
-	return id, nil
+	return id, token, nil
 }
 
 func (s *Service)GetWishlist(ctx context.Context, wishlistId int, userId int) (Wishlist, error) {

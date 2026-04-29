@@ -19,7 +19,8 @@ type WishlistDTO struct {
 	Id int`json:"id"`
 	Event string`json:"event"`
 	Description string`json:"desc"`
-	Date *time.Time`date:"date"`
+	Date *time.Time`json:"date"`
+	Token string`json:"token"`
 }
 
 func(w *WishlistDTO)Validate() bool {

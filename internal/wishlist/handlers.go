@@ -58,7 +58,7 @@ func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request){
 		Date: *wishlistDto.Date,
 	}
 
-	id, err := wh.wishlistService.AddWishlist(r.Context(), wishlist); 
+	id, token, err := wh.wishlistService.AddWishlist(r.Context(), wishlist); 
 	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
@@ -67,6 +67,7 @@ func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request){
 
 	w.WriteHeader(http.StatusCreated)
 	wishlist.Id = id
+	wishlist.Token = token
 	b, err := json.MarshalIndent(wishlist, "", "\t")
 	if err != nil{
 		errDTO := dto.NewErrorDTO(err)
@@ -121,6 +122,7 @@ func (wh *WishlistHandler) GetWishlist(w http.ResponseWriter, r *http.Request){
 		Event: wishlist.Event,
 		Description: wishlist.Description,
 		Date: &wishlist.Date,
+		Token: wishlist.Token,
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -170,6 +172,7 @@ func (wh *WishlistHandler) GetWishlists(w http.ResponseWriter, r *http.Request){
 			Event: a.Event,
 			Description: a.Description,
 			Date: &a.Date,
+			Token: a.Token,
 		})
 	}
 
