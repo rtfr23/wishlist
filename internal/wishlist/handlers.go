@@ -58,14 +58,15 @@ func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request){
 		Date: *wishlistDto.Date,
 	}
 
-	if err := wh.wishlistService.AddWishlist(r.Context(), wishlist); err != nil {
+	id, err := wh.wishlistService.AddWishlist(r.Context(), wishlist); 
+	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
-
+	wishlist.Id = id
 	b, err := json.MarshalIndent(wishlist, "", "\t")
 	if err != nil{
 		errDTO := dto.NewErrorDTO(err)

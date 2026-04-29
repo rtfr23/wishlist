@@ -16,13 +16,15 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{database: db,}
 }
 
-func (r *Repository)InsertWishlist(ctx context.Context, wishlist Wishlist) error {
+func (r *Repository)InsertWishlist(ctx context.Context, wishlist Wishlist) (int, error) {
 	sqlQuery := `
 		INSERT INTO wishlists (user_id, event, description, date)
-		VALUES($1, $2, $3, $4);
+		VALUES($1, $2, $3, $4)
+		RETURNING id;
 	`
-	_, err := r.database.Exec(ctx, sqlQuery, wishlist.User_id,wishlist.Event, wishlist.Description, wishlist.Date)
-	return err	
+	var id int
+	err := r.database.QueryRow(ctx, sqlQuery, wishlist.User_id,wishlist.Event, wishlist.Description, wishlist.Date).Scan(&id)
+	return id, err	
 }
 
 func (r *Repository)SelectWishlist(ctx context.Context, wishlistId int, userId int) (Wishlist, error) {
@@ -47,7 +49,6 @@ func (r *Repository)SelectWishlist(ctx context.Context, wishlistId int, userId i
 	return wishlist, nil
 }
 
-// TODO: , delete wishlist, update wishlist
 func (r *Repository)SelectAllWishlists(ctx context.Context, userId int) ([]Wishlist, error) {
 	sqlQuery := `
 		SELECT id, user_id, event, description, date

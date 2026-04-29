@@ -23,12 +23,13 @@ func NewService(rep *Repository) *Service {
 	}
 }
 
-func (s *Service)AddWishlist(ctx context.Context, wishlist Wishlist) error {
-	if err := s.repository.InsertWishlist(ctx, wishlist); err != nil {
-		return err
+func (s *Service)AddWishlist(ctx context.Context, wishlist Wishlist) (int, error) {
+	id, err := s.repository.InsertWishlist(ctx, wishlist); 
+	if err != nil {
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (s *Service)GetWishlist(ctx context.Context, wishlistId int, userId int) (Wishlist, error) {

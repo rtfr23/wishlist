@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"wishlist/internal/auth"
 	"wishlist/internal/auth/token"
@@ -20,7 +21,7 @@ func main(){
 		panic(err)
 	}
 	defer dbpool.Close()
-
+	
 	secret_key := os.Getenv("SECRET_KEY")
 	authJwtMaker := token.NewJWTMaker(secret_key)
 
@@ -29,13 +30,15 @@ func main(){
 	auth_repository := auth.NewRepository(dbpool)
 	authService := auth.NewService(auth_repository, authJwtMaker)
 	authHandler := auth.NewAuthHandler(authService)
-
+	
 	wishlist_repository := wishlist.NewRepository(dbpool)
 	wishlistService := wishlist.NewService(wishlist_repository)
 	wishlistHandler := wishlist.NewWishlistHandler(wishlistService)
 
 	httpHandlers := server.NewHTTPHandlers(*authHandler, *wishlistHandler)
 	httpServer := server.NewHTTPServer(httpHandlers)
-	httpServer.Start(":8080", *jwtMiddleware)
 	
+	if err := httpServer.Start(":8080", *jwtMiddleware); err != nil {
+		fmt.Println(err)
+	}
 }
