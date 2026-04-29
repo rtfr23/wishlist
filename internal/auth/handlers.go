@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -12,7 +11,7 @@ type AuthHandler struct {
 	authService *Service
 }
 
-func NewAuthHandler(ctx context.Context, authservice *Service) *AuthHandler {
+func NewAuthHandler(authservice *Service) *AuthHandler {
 	return &AuthHandler{
 		authService: authservice,
 	}
