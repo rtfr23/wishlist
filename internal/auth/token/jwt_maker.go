@@ -2,6 +2,7 @@ package token
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,9 +16,9 @@ func NewJWTMaker(secretKey string) *JWTMaker {
 	return &JWTMaker{secretKey: secretKey, }
 }
 
-func (m *JWTMaker) CreateToken(email string, duration time.Duration) (string, error) {
+func (m *JWTMaker) CreateToken(userId int, duration time.Duration) (string, error) {
 	claims := jwt.RegisteredClaims{
-		Subject: email,
+		Subject: strconv.Itoa(userId),
 		IssuedAt: jwt.NewNumericDate(time.Now()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 	}

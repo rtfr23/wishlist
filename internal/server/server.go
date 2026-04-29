@@ -46,11 +46,11 @@ func (s *HTTPServer)Start(port string, jwtMiddleware middleware.JWTMiddleware) e
 	
 	closed := router.PathPrefix("/wishlists").Subrouter()
 	closed.Use(jwtMiddleware.Check)
-	router.Path("").Methods("POST").HandlerFunc(s.httpHandler.WishlistHandler.AddWishlist)
-	router.Path("").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlists)
-	router.Path("/{id}").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlist)
-	router.Path("/{id}").Methods("PATCH").HandlerFunc(s.httpHandler.WishlistHandler.UpdateWishlist)
-	router.Path("/{id}").Methods("DELETE").HandlerFunc(s.httpHandler.WishlistHandler.DeleteWishlist)
+	closed.Path("").Methods("POST").HandlerFunc(s.httpHandler.WishlistHandler.AddWishlist)
+	closed.Path("").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlists)
+	closed.Path("/{id}").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlist)
+	closed.Path("/{id}").Methods("PATCH").HandlerFunc(s.httpHandler.WishlistHandler.UpdateWishlist)
+	closed.Path("/{id}").Methods("DELETE").HandlerFunc(s.httpHandler.WishlistHandler.DeleteWishlist)
 	
 	/*
 	TODO:

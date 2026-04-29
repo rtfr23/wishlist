@@ -39,14 +39,14 @@ func (r *Repository)InsertUser(ctx context.Context, user User) error {
 
 func (r *Repository)GetUser(ctx context.Context, Email string) (User, error) {
 	sqlQuery := `
-		SELECT email, password_hash
+		SELECT id, password_hash
 		FROM users
 		WHERE email = $1
 	`
 	UserRow := r.database.QueryRow(ctx, sqlQuery, Email)
 
 	var user User
-	err := UserRow.Scan(&user.Email, &user.Password)
+	err := UserRow.Scan(&user.Id, &user.Password)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

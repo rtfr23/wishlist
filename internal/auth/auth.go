@@ -14,6 +14,7 @@ type Service struct {
 }
 
 type User struct {
+	Id int
 	Email string
 	Password string
 }
@@ -36,7 +37,7 @@ func (s *Service)Login(ctx context.Context, user User) (string, error) {
 		return "", ErrWrongPassword
 	}
 
-	token, err := s.jwtMaker.CreateToken(user.Email, 60*time.Minute)
+	token, err := s.jwtMaker.CreateToken(guessUser.Id, 60*time.Minute)
 
 	if err != nil {
 		return "", err
