@@ -41,6 +41,14 @@ func (s *Service)GetWishlist(ctx context.Context, wishlistId int, userId int) (W
 	return wishlist, nil
 }
 
+func (s *Service)GetWishlistWithToken(ctx context.Context, token string) (Wishlist, error) {
+	wishlist, err := s.repository.SelectWishlistWithToken(ctx, token)
+	if err != nil {
+		return Wishlist{}, err
+	}
+	return wishlist, nil
+}
+
 func (s *Service)GetAllWishlists(ctx context.Context, userId int) ([]Wishlist, error) {
 	wishlists, err := s.repository.SelectAllWishlists(ctx, userId)
 	if err != nil {

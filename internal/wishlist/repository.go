@@ -79,6 +79,29 @@ func (r *Repository)SelectAllWishlists(ctx context.Context, userId int) ([]Wishl
 	return wishlists, nil
 }
 
+func (r *Repository)SelectWishlistWithToken(ctx context.Context, token string) (Wishlist, error){
+	sqlQuery := `
+		SELECT id, user_id, event, description, date
+		FROM wishlists
+		WHERE token = $1;
+	`
+	wishlistRow := r.database.QueryRow(ctx, sqlQuery, token)
+
+	var wishlist Wishlist
+	err := wishlistRow.Scan(&wishlist.Id, &wishlist.User_id, &wishlist.Event, &wishlist.Description, &wishlist.Date)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return Wishlist{}, ErrWishlistNotFound
+		} else {
+			return Wishlist{}, err
+		}
+	}	
+
+	return wishlist, nil
+	
+}
+
 func (r *Repository)UpdateWishlist(ctx context.Context, wishlist Wishlist) (Wishlist, error) {
 	sqlQuery := `
 		UPDATE wishlists

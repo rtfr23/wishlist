@@ -191,6 +191,40 @@ func (wh *WishlistHandler) GetWishlists(w http.ResponseWriter, r *http.Request){
 
 }
 
+func (wh *WishlistHandler)GetWishlistWithToken(w http.ResponseWriter, r *http.Request){
+	token := mux.Vars(r)["token"]
+	
+	if token == "" {
+		errDTO := dto.NewErrorDTO(errors.New("Empty token"))
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	wishlist, err := wh.wishlistService.GetWishlistWithToken(r.Context(), token); 
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusNotFound)
+		return
+	} 
+
+	b, err := json.MarshalIndent(wishlist, "", "\t")
+	if err != nil{
+		errDTO := dto.NewErrorDTO(err)
+		if errors.Is(err, ErrWishlistNotFound) {
+			http.Error(w, errDTO.ToString(), http.StatusNotFound)
+			return
+		} else {
+			http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+			return
+		}
+		
+	}
+
+	if _, err := w.Write(b); err != nil {
+		return
+	}
+}
+
 func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request){
 	wishlistStr := mux.Vars(r)["id"]
 	wishlistId, err := strconv.Atoi(wishlistStr)
