@@ -21,8 +21,8 @@ func NewJWTMiddleware(maker *token.JWTMaker) *JWTMiddleware  {
 
 var ClaimsKey = struct{}{}
 
-func (m* JWTMiddleware)Check(h http.HandlerFunc) http.HandlerFunc{
-	return func(w http.ResponseWriter, r *http.Request){
+func (m* JWTMiddleware)Check(h http.Handler) http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
 		header := r.Header.Get("Authorization")
 		if header == "" {
 			errDTO := dto.NewErrorDTO(errors.New("Missing authorization token"))
@@ -47,6 +47,6 @@ func (m* JWTMiddleware)Check(h http.HandlerFunc) http.HandlerFunc{
 		}
 
 		ctx := context.WithValue(r.Context(), ClaimsKey, claims)
-		h(w, r.WithContext(ctx))
-	}
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
 } 

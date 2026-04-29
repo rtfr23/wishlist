@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"wishlist/internal/auth"
+	"wishlist/internal/middleware"
+	"wishlist/internal/wishlist"
 
 	"github.com/gorilla/mux"
 )
@@ -21,11 +23,13 @@ type HTTPHandlers struct {
 	*/
 
 	AuthHandler *auth.AuthHandler
+	WishlistHandler *wishlist.WishlistHandler
 }
 
-func NewHTTPHandlers(AuthHandler auth.AuthHandler) *HTTPHandlers {
+func NewHTTPHandlers(AuthHandler auth.AuthHandler, WishlistHandler wishlist.WishlistHandler) *HTTPHandlers {
 	return &HTTPHandlers{
 		AuthHandler: &AuthHandler,
+		WishlistHandler: &WishlistHandler,
 	}
 }
 
@@ -35,10 +39,19 @@ func NewHTTPServer(handler *HTTPHandlers) *HTTPServer{
 	}
 }
 
-func (s *HTTPServer)Start(port string) error {
+func (s *HTTPServer)Start(port string, jwtMiddleware middleware.JWTMiddleware) error {
 	router := mux.NewRouter()
 	router.Path("/auth/signup").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.RegisterUser)
 	router.Path("/auth/signin").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.LoginUser)
+	
+	closed := router.PathPrefix("/wishlists").Subrouter()
+	closed.Use(jwtMiddleware.Check)
+	router.Path("").Methods("POST").HandlerFunc(s.httpHandler.WishlistHandler.AddWishlist)
+	router.Path("").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlists)
+	router.Path("/{id}").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlist)
+	router.Path("/{id}").Methods("PATCH").HandlerFunc(s.httpHandler.WishlistHandler.UpdateWishlist)
+	router.Path("/{id}").Methods("DELETE").HandlerFunc(s.httpHandler.WishlistHandler.DeleteWishlist)
+	
 	/*
 	TODO:
 	endpoints
