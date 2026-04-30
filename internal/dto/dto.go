@@ -6,31 +6,47 @@ import (
 )
 
 type UserDTO struct {
-	Email string`json:"email"`
-	Password string`json:"password"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type ErrDTO struct {
-	Message string 
-	Time time.Time
+	Message string
+	Time    time.Time
 }
 
 type WishlistDTO struct {
-	Id int`json:"id"`
-	Event string`json:"event"`
-	Description string`json:"desc"`
-	Date *time.Time`json:"date"`
-	Token string`json:"token"`
+	Id          int        `json:"id"`
+	Event       string     `json:"event"`
+	Description string     `json:"desc"`
+	Date        *time.Time `json:"date"`
+	Token       string     `json:"token"`
 }
 
-func(w *WishlistDTO)Validate() bool {
-	if w.Event == "" || w.Date == nil{
+type ItemDTO struct {
+	Id          int    `json:"id"`
+	Wishlist_id int    `json:"wishlist_id"`
+	Title       string `json:"title"`
+	Description string `json:"desc"`
+	URL         string `json:"url"`
+	Priority    int    `json:"priority"`
+}
+
+func (w *WishlistDTO) Validate() bool {
+	if w.Event == "" || w.Date == nil {
 		return false
 	}
 	return true
 }
 
-func (u *UserDTO)Validate() bool {
+func (i *ItemDTO) Validate() bool {
+	if i.Title == "" {
+		return false
+	}
+	return true
+}
+
+func (u *UserDTO) Validate() bool {
 	if u.Email == "" || u.Password == "" {
 		return false
 	}
@@ -39,13 +55,13 @@ func (u *UserDTO)Validate() bool {
 }
 
 func NewErrorDTO(err error) ErrDTO {
-	return ErrDTO {
+	return ErrDTO{
 		Message: err.Error(),
-		Time: time.Now(),
+		Time:    time.Now(),
 	}
 }
 
-func (e *ErrDTO)ToString() string {
+func (e *ErrDTO) ToString() string {
 	b, err := json.MarshalIndent(e, "", "\t")
 	if err != nil {
 		return err.Error()

@@ -1,7 +1,7 @@
 CREATE TABLE items (
     id SERIAL PRIMARY KEY,
     wishlist_id INTEGER NOT NULL,
-    title VARCHAR(256),
+    title VARCHAR(256) NOT NULL,
     description VARCHAR(1024),
     url VARCHAR(512),
     priority INT NOT NULL,

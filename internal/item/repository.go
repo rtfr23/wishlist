@@ -16,14 +16,26 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{database: db}
 }
 
-func (r *Repository) InsertItem(ctx context.Context, item Item) (int, error) {
+func (r *Repository) InsertItem(ctx context.Context, item Item, userId int) (int, error) {
+	existQuery := `
+		SELECT EXISTS(
+		SELECT 1 FROM wishlists
+		WHERE id = $1 AND user_id = %2);
+	`
+	var exists bool
+	err := r.database.QueryRow(ctx, existQuery, item.Wishlist_id, userId).Scan(&exists)
+
+	if err != nil || !exists {
+		return 0, ErrAccessDenied
+	}
+
 	sqlQuery := `
 		INSERT INTO items (wishlist_id, title, description, url, priority)
 		VALUES($1, $2, $3, $4, $5)
 		RETURNING id;
 	`
 	var id int
-	err := r.database.QueryRow(ctx, sqlQuery, item.Wishlist_id, item.Title, item.Description, item.URL, item.Priority).Scan(&id)
+	err = r.database.QueryRow(ctx, sqlQuery, item.Wishlist_id, item.Title, item.Description, item.URL, item.Priority).Scan(&id)
 	return id, err
 }
 
