@@ -11,11 +11,13 @@ import (
 	"wishlist/internal/middleware"
 	"wishlist/internal/server"
 	"wishlist/internal/wishlist"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	ctx := context.Background()
-
+	godotenv.Load()
 	conn_string := os.Getenv("CONN_STRING")
 	dbpool, err := db.NewPostgresDB(ctx, conn_string)
 	if err != nil {
