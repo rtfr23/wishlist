@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"wishlist/internal/auth"
+	"wishlist/internal/item"
 	"wishlist/internal/middleware"
 	"wishlist/internal/wishlist"
 
@@ -16,34 +17,35 @@ type HTTPServer struct {
 
 type HTTPHandlers struct {
 	/*
-	TODO:
-		auth handler
-		wishlist handler
-		item handler
+		TODO:
+			auth handler
+			wishlist handler
+			item handler
 	*/
 
-	AuthHandler *auth.AuthHandler
+	AuthHandler     *auth.AuthHandler
 	WishlistHandler *wishlist.WishlistHandler
+	ItemHandler     *item.ItemHandler
 }
 
-func NewHTTPHandlers(AuthHandler auth.AuthHandler, WishlistHandler wishlist.WishlistHandler) *HTTPHandlers {
+func NewHTTPHandlers(AuthHandler auth.AuthHandler, WishlistHandler wishlist.WishlistHandler, ItemHandler item.ItemHandler) *HTTPHandlers {
 	return &HTTPHandlers{
-		AuthHandler: &AuthHandler,
+		AuthHandler:     &AuthHandler,
 		WishlistHandler: &WishlistHandler,
+		ItemHandler:     &ItemHandler,
 	}
 }
 
-func NewHTTPServer(handler *HTTPHandlers) *HTTPServer{
-	return &HTTPServer {
+func NewHTTPServer(handler *HTTPHandlers) *HTTPServer {
+	return &HTTPServer{
 		httpHandler: handler,
 	}
 }
 
-func (s *HTTPServer)Start(port string, jwtMiddleware middleware.JWTMiddleware) error {
+func (s *HTTPServer) Start(port string, jwtMiddleware middleware.JWTMiddleware) error {
 	router := mux.NewRouter()
 	router.Path("/auth/signup").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.RegisterUser)
 	router.Path("/auth/signin").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.LoginUser)
-	
 
 	router.Path("/public/wishlists/{token}").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlistWithToken)
 	closed := router.PathPrefix("/wishlists").Subrouter()
@@ -53,31 +55,12 @@ func (s *HTTPServer)Start(port string, jwtMiddleware middleware.JWTMiddleware) e
 	closed.Path("/{id}").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlist)
 	closed.Path("/{id}").Methods("PATCH").HandlerFunc(s.httpHandler.WishlistHandler.UpdateWishlist)
 	closed.Path("/{id}").Methods("DELETE").HandlerFunc(s.httpHandler.WishlistHandler.DeleteWishlist)
-	
-	/*
-	TODO:
-	endpoints
 
-	wishlist:
-		closed:
-			GET /wishlists
-			GET /wishlists/{id}
-			POST /wishlists
-			PATCH /wishlists/{id}
-			DELETE /wishlists/{id}
-		opened:
-			GET /wishlists/{token}
-
-	item:
-		closed:
-			GET /wishlists/name/items/{id}
-			GET /wishlists/name/items
-			PATCH /wishlists/name/items/{id}
-			POST /wishlists/name/items
-			DELETE /wishlists/name/items/{id}
-		opened:
-			PATCH /wishlists/token/items/{id}
-	*/
+	closed.Path("/{id}/items").Methods("POST").HandlerFunc(s.httpHandler.ItemHandler.AddItem)
+	closed.Path("/{id}/items").Methods("GET").HandlerFunc(s.httpHandler.ItemHandler.GetItems)
+	closed.Path("/{id}/items/{itemid}").Methods("GET").HandlerFunc(s.httpHandler.ItemHandler.GetItem)
+	closed.Path("/{id}/items/{itemid}").Methods("POST").HandlerFunc(s.httpHandler.ItemHandler.UpdateItem)
+	closed.Path("/{id}/items/{itemid}").Methods("DELETE").HandlerFunc(s.httpHandler.ItemHandler.DeleteItem)
 
 	if err := http.ListenAndServe(port, router); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
