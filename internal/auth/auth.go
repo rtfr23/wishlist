@@ -10,23 +10,23 @@ import (
 
 type Service struct {
 	repository *Repository
-	jwtMaker *token.JWTMaker
+	jwtMaker   *token.JWTMaker
 }
 
 type User struct {
-	Id int
-	Email string
+	Id       int
+	Email    string
 	Password string
 }
 
 func NewService(rep *Repository, jwtM *token.JWTMaker) *Service {
-	return &Service {
+	return &Service{
 		repository: rep,
-		jwtMaker: jwtM,
+		jwtMaker:   jwtM,
 	}
 }
 
-func (s *Service)Login(ctx context.Context, user User) (string, error) {
+func (s *Service) Login(ctx context.Context, user User) (string, error) {
 	guessUser, err := s.repository.GetUser(ctx, user.Email)
 
 	if err != nil {
@@ -46,7 +46,7 @@ func (s *Service)Login(ctx context.Context, user User) (string, error) {
 	return token, nil
 }
 
-func (s *Service)Register(ctx context.Context, user User) error {
+func (s *Service) Register(ctx context.Context, user User) error {
 	password_hash, err := generatePassword(user.Password)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (s *Service)Register(ctx context.Context, user User) error {
 	return nil
 }
 
-func generatePassword(password string) (string, error){
+func generatePassword(password string) (string, error) {
 	password_hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {
