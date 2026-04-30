@@ -59,7 +59,7 @@ func (s *HTTPServer) Start(port string, jwtMiddleware middleware.JWTMiddleware) 
 	closed.Path("/{id}/items").Methods("POST").HandlerFunc(s.httpHandler.ItemHandler.AddItem)
 	closed.Path("/{id}/items").Methods("GET").HandlerFunc(s.httpHandler.ItemHandler.GetItems)
 	closed.Path("/{id}/items/{itemid}").Methods("GET").HandlerFunc(s.httpHandler.ItemHandler.GetItem)
-	closed.Path("/{id}/items/{itemid}").Methods("POST").HandlerFunc(s.httpHandler.ItemHandler.UpdateItem)
+	closed.Path("/{id}/items/{itemid}").Methods("PACTH").HandlerFunc(s.httpHandler.ItemHandler.UpdateItem)
 	closed.Path("/{id}/items/{itemid}").Methods("DELETE").HandlerFunc(s.httpHandler.ItemHandler.DeleteItem)
 
 	if err := http.ListenAndServe(port, router); err != nil {
