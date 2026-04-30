@@ -24,8 +24,8 @@ func NewService(rep *Repository) *Service {
 	}
 }
 
-func (s *Service) AddItem(ctx context.Context, item Item) (int, error) {
-	id, err := s.repository.InsertItem(ctx, item)
+func (s *Service) AddItem(ctx context.Context, item Item, userId int) (int, error) {
+	id, err := s.repository.InsertItem(ctx, item, userId)
 	if err != nil {
 		return 0, err
 
