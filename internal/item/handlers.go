@@ -23,6 +23,14 @@ func NewItemHandler(itemService *Service) *ItemHandler {
 }
 
 func (i *ItemHandler) AddItem(w http.ResponseWriter, r *http.Request) {
+	wishlistStr := mux.Vars(r)["id"]
+	wishlistId, err := strconv.Atoi(wishlistStr)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
 	var itemDto dto.ItemDTO
 	if err := json.NewDecoder(r.Body).Decode(&itemDto); err != nil {
 		errDTO := dto.NewErrorDTO(err)
@@ -52,7 +60,7 @@ func (i *ItemHandler) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	item := Item{
-		Wishlist_id: itemDto.Wishlist_id,
+		Wishlist_id: wishlistId,
 		Title:       itemDto.Title,
 		Description: itemDto.Description,
 		URL:         itemDto.URL,
@@ -209,4 +217,145 @@ func (i *ItemHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write(b); err != nil {
 		return
 	}
+}
+
+func (i *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
+	wishlistStr := mux.Vars(r)["id"]
+	wishlistId, err := strconv.Atoi(wishlistStr)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	itemStr := mux.Vars(r)["itemid"]
+	itemId, err := strconv.Atoi(itemStr)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	var patchedItemDto dto.ItemDTO
+	if err := json.NewDecoder(r.Body).Decode(&patchedItemDto); err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	claims, ok := r.Context().Value(middleware.ClaimsKey).(*jwt.RegisteredClaims)
+	if !ok {
+		errDTO := dto.NewErrorDTO(errors.New("Unauthorized"))
+		http.Error(w, errDTO.ToString(), http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := strconv.Atoi(claims.Subject)
+
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusUnauthorized)
+		return
+	}
+
+	patchedItem := Item{
+		Id:          itemId,
+		Wishlist_id: wishlistId,
+		Priority:    patchedItemDto.Priority,
+	}
+
+	if patchedItemDto.Title != "" {
+		patchedItem.Title = patchedItemDto.Title
+	}
+
+	if patchedItemDto.Description != "" {
+		patchedItem.Description = patchedItemDto.Description
+	}
+
+	if patchedItemDto.URL != "" {
+		patchedItem.URL = patchedItemDto.URL
+	}
+
+	item, err := i.itemService.UpdateItem(r.Context(), patchedItem, userId)
+
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		if errors.Is(err, ErrItemNotFound) {
+			http.Error(w, errDTO.ToString(), http.StatusNotFound)
+			return
+		} else {
+			http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	itemDto := dto.ItemDTO{
+		Id:          item.Id,
+		Wishlist_id: item.Wishlist_id,
+		Title:       item.Title,
+		Description: item.Description,
+		URL:         item.URL,
+		Priority:    item.Priority,
+	}
+
+	w.WriteHeader(http.StatusOK)
+
+	b, err := json.MarshalIndent(itemDto, "", "\t")
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := w.Write(b); err != nil {
+		return
+	}
+}
+
+func (i *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
+	wishlistStr := mux.Vars(r)["id"]
+	wishlistId, err := strconv.Atoi(wishlistStr)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	itemStr := mux.Vars(r)["itemid"]
+	itemId, err := strconv.Atoi(itemStr)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	claims, ok := r.Context().Value(middleware.ClaimsKey).(*jwt.RegisteredClaims)
+	if !ok {
+		errDTO := dto.NewErrorDTO(errors.New("Unauthorized"))
+		http.Error(w, errDTO.ToString(), http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := strconv.Atoi(claims.Subject)
+
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusUnauthorized)
+		return
+	}
+
+	err = i.itemService.DeleteItem(r.Context(), itemId, wishlistId, userId)
+
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		if errors.Is(err, ErrItemNotFound) {
+			http.Error(w, errDTO.ToString(), http.StatusNotFound)
+			return
+		} else {
+			http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
