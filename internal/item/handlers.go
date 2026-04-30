@@ -369,3 +369,34 @@ func (i *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h *ItemHandler) ReserveItem(w http.ResponseWriter, r *http.Request) {
+	token := mux.Vars(r)["token"]
+	if token == "" {
+		errDTO := dto.NewErrorDTO(errors.New("token required"))
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	itemStr := mux.Vars(r)["itemid"]
+	itemId, err := strconv.Atoi(itemStr)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	err = h.itemService.ReserveItem(r.Context(), token, itemId)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		if errors.Is(err, ErrAlreadyReserved) {
+			http.Error(w, errDTO.ToString(), http.StatusConflict)
+			return
+		} else {
+			http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

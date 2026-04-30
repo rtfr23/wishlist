@@ -68,3 +68,11 @@ func (s *Service) DeleteItem(ctx context.Context, itemId int, wishlistId int, us
 
 	return nil
 }
+
+func (s *Service) ReserveItem(ctx context.Context, token string, itemId int) error {
+	if err := s.repository.ReserveItem(ctx, token, itemId); err != nil {
+		return err
+	}
+
+	return nil
+}

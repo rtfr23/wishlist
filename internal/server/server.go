@@ -39,7 +39,7 @@ func (s *HTTPServer) Start(port string, jwtMiddleware middleware.JWTMiddleware) 
 	router := mux.NewRouter()
 	router.Path("/auth/signup").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.RegisterUser)
 	router.Path("/auth/signin").Methods("POST").HandlerFunc(s.httpHandler.AuthHandler.LoginUser)
-
+	router.Path("/public/wishlists/{token}/items/{itemid}/reserve").Methods("POST").HandlerFunc(s.httpHandler.ItemHandler.ReserveItem)
 	router.Path("/public/wishlists/{token}").Methods("GET").HandlerFunc(s.httpHandler.WishlistHandler.GetWishlistWithToken)
 	closed := router.PathPrefix("/wishlists").Subrouter()
 	closed.Use(jwtMiddleware.Check)

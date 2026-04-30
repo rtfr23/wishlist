@@ -130,3 +130,23 @@ func (r *Repository) DeleteItem(ctx context.Context, itemId int, wishlistId int,
 
 	return nil
 }
+
+func (r *Repository) ReserveItem(ctx context.Context, token string, itemID int) error {
+	sqlQuery := `
+		UPDATE items i
+		SET is_reserved = TRUE
+		FROM wishlists w
+		WHERE i.id = $1 AND i.wishlist_id = w.id AND w.token = $2 AND i.is_reserved = FALSE;
+	`
+
+	res, err := r.database.Exec(ctx, sqlQuery, itemID, token)
+	if err != nil {
+		return err
+	}
+
+	if res.RowsAffected() == 0 {
+		return ErrAlreadyReserved
+	}
+
+	return nil
+}
