@@ -24,12 +24,12 @@ type WishlistDTO struct {
 }
 
 type ItemDTO struct {
-	Id          int    `json:"id"`
-	Wishlist_id int    `json:"wishlist_id"`
-	Title       string `json:"title"`
-	Description string `json:"desc"`
-	URL         string `json:"url"`
-	Priority    int    `json:"priority"`
+	Id          int     `json:"id"`
+	Wishlist_id int     `json:"wishlist_id"`
+	Title       *string `json:"title"`
+	Description *string `json:"desc"`
+	URL         *string `json:"url"`
+	Priority    *int    `json:"priority"`
 }
 
 func (w *WishlistDTO) Validate() bool {
@@ -40,7 +40,7 @@ func (w *WishlistDTO) Validate() bool {
 }
 
 func (i *ItemDTO) Validate() bool {
-	if i.Title == "" {
+	if i.Title == nil {
 		return false
 	}
 	return true

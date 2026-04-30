@@ -11,10 +11,10 @@ type Service struct {
 type Item struct {
 	Id          int
 	Wishlist_id int
-	Title       string
-	Description string
-	URL         string
-	Priority    int
+	Title       *string
+	Description *string
+	URL         *string
+	Priority    *int
 	IsReserved  bool
 }
 

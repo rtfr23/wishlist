@@ -19,9 +19,9 @@ func NewRepository(db *pgxpool.Pool) *Repository {
 func (r *Repository) InsertItem(ctx context.Context, item Item, userId int) (int, error) {
 	sqlQuery := `
 		INSERT INTO items (wishlist_id, title, description, url, priority)
-		VALUES($1, $2, $3, $4, $5)
+		SELECT $1, $2, $3, $4, $5 FROM wishlists
 		WHERE EXISTS (
-			SELECT 1 FROM wishlists WHERE id = $1 AND user_id = %6
+			SELECT 1 FROM wishlists WHERE id = $1 AND user_id = $6
 		)
 		RETURNING id;
 	`
@@ -62,7 +62,7 @@ func (r *Repository) SelectItem(ctx context.Context, itemId int, wishlistId int,
 
 func (r *Repository) SelectAllItems(ctx context.Context, wishlistId int, userId int) ([]Item, error) {
 	sqlQuery := `
-		SELECT id, wishlist_id, title, description, url, priority, is_reserved
+		SELECT i.id, wishlist_id, title, i.description, url, priority, is_reserved
 		FROM items i
 		INNER JOIN wishlists w on i.wishlist_id = w.id
 		WHERE w.user_id = $1 AND i.wishlist_id = $2
@@ -93,7 +93,11 @@ func (r *Repository) SelectAllItems(ctx context.Context, wishlistId int, userId 
 func (r *Repository) UpdateItem(ctx context.Context, item Item, userId int) (Item, error) {
 	sqlQuery := `
 		UPDATE items i
-		SET title = $1, description = $2, url = $3, priority = $4
+		SET
+			title = CASE WHEN $1::text IS NULL THEN i.title ELSE $1::text END,
+			description = CASE WHEN $2::text IS NULL THEN i.description ELSE $2::text END,
+			url = CASE WHEN $3::text IS NULL THEN i.url ELSE $3::text END,
+			priority = CASE WHEN $4::int IS NULL THEN i.priority ELSE $4::int END
 		FROM wishlists w
 		WHERE i.id = $5 AND i.wishlist_id = w.id AND w.id = $6 AND w.user_id = $7
 	`

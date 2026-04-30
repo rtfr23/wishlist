@@ -53,18 +53,27 @@ func (i *ItemHandler) AddItem(w http.ResponseWriter, r *http.Request) {
 
 	userId, err := strconv.Atoi(claims.Subject)
 
+	item := Item{
+		Wishlist_id: wishlistId,
+	}
+
+	if itemDto.Title != nil {
+		item.Title = itemDto.Title
+	}
+	if itemDto.Description != nil {
+		item.Description = itemDto.Description
+	}
+	if itemDto.URL != nil {
+		item.URL = itemDto.URL
+	}
+	if itemDto.Priority != nil {
+		item.Priority = itemDto.Priority
+	}
+
 	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusUnauthorized)
 		return
-	}
-
-	item := Item{
-		Wishlist_id: wishlistId,
-		Title:       itemDto.Title,
-		Description: itemDto.Description,
-		URL:         itemDto.URL,
-		Priority:    itemDto.Priority,
 	}
 
 	id, err := i.itemService.AddItem(r.Context(), item, userId)
@@ -261,21 +270,22 @@ func (i *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	patchedItem := Item{
 		Id:          itemId,
 		Wishlist_id: wishlistId,
-		Priority:    patchedItemDto.Priority,
 	}
 
-	if patchedItemDto.Title != "" {
+	if patchedItemDto.Title != nil {
 		patchedItem.Title = patchedItemDto.Title
 	}
 
-	if patchedItemDto.Description != "" {
+	if patchedItemDto.Description != nil {
 		patchedItem.Description = patchedItemDto.Description
 	}
 
-	if patchedItemDto.URL != "" {
+	if patchedItemDto.URL != nil {
 		patchedItem.URL = patchedItemDto.URL
 	}
-
+	if patchedItemDto.Priority != nil {
+		patchedItem.Priority = patchedItemDto.Priority
+	}
 	item, err := i.itemService.UpdateItem(r.Context(), patchedItem, userId)
 
 	if err != nil {
