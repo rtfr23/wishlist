@@ -1,16 +1,70 @@
 package item
 
+import (
+	"context"
+)
+
 type Service struct {
 	repository *Repository
 }
 
 type Item struct {
-	Id int
+	Id          int
 	Wishlist_id int
-	Title string
+	Title       string
 	Description string
-	URL string
-	Priority int
-	IsReserved int
+	URL         string
+	Priority    int
+	IsReserved  int
 }
 
+func NewService(rep *Repository) *Service {
+	return &Service{
+		repository: rep,
+	}
+}
+
+func (s *Service) AddItem(ctx context.Context, item Item) (int, error) {
+	id, err := s.repository.InsertItem(ctx, item)
+	if err != nil {
+		return 0, err
+
+	}
+
+	return id, nil
+}
+
+func (s *Service) GetItem(ctx context.Context, itemId int, wishlistId int) (Item, error) {
+	item, err := s.repository.SelectItem(ctx, itemId, wishlistId)
+	if err != nil {
+		return Item{}, err
+	}
+
+	return item, nil
+}
+
+func (s *Service) GetAllItems(ctx context.Context, wishlistId int) ([]Item, error) {
+	items, err := s.repository.SelectAllItems(ctx, wishlistId)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (s *Service) UpdateItem(ctx context.Context, item Item) (Item, error) {
+	updatedItem, err := s.repository.UpdateItem(ctx, item)
+
+	if err != nil {
+		return Item{}, err
+	}
+
+	return updatedItem, nil
+}
+
+func (s *Service) DeleteItem(ctx context.Context, itemId int, wishlistId int) error {
+	if err := s.repository.DeleteItem(ctx, itemId, wishlistId); err != nil {
+		return err
+	}
+
+	return nil
+}
