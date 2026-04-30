@@ -20,7 +20,7 @@ func (r *Repository) InsertItem(ctx context.Context, item Item, userId int) (int
 	existQuery := `
 		SELECT EXISTS(
 		SELECT 1 FROM wishlists
-		WHERE id = $1 AND user_id = %2);
+		WHERE id = $1 AND user_id = $2);
 	`
 	var exists bool
 	err := r.database.QueryRow(ctx, existQuery, item.Wishlist_id, userId).Scan(&exists)
@@ -39,13 +39,14 @@ func (r *Repository) InsertItem(ctx context.Context, item Item, userId int) (int
 	return id, err
 }
 
-func (r *Repository) SelectItem(ctx context.Context, itemId int, wishlistId int) (Item, error) {
+func (r *Repository) SelectItem(ctx context.Context, itemId int, userId int) (Item, error) {
 	sqlQuery := `
 		SELECT id, wishlist_id, title, description, url, priority, is_reserved
-		FROM items
-		WHERE id = $1 AND wishlist_id = $2;
+		FROM items i
+		INNER JOIN wishlists w on i.wishlist_id = w.id
+		WHERE i.id = $1 AND w.user_id = $2;
 	`
-	itemRow := r.database.QueryRow(ctx, sqlQuery, itemId, wishlistId)
+	itemRow := r.database.QueryRow(ctx, sqlQuery, itemId, userId)
 
 	var item Item
 	err := itemRow.Scan(&item.Id, &item.Wishlist_id, &item.Title, &item.Description, &item.URL, &item.Priority, &item.IsReserved)
@@ -61,15 +62,16 @@ func (r *Repository) SelectItem(ctx context.Context, itemId int, wishlistId int)
 	return item, nil
 }
 
-func (r *Repository) SelectAllItems(ctx context.Context, wishlistId int) ([]Item, error) {
+func (r *Repository) SelectAllItems(ctx context.Context, userId int) ([]Item, error) {
 	sqlQuery := `
 		SELECT id, wishlist_id, title, description, url, priority, is_reserved
-		FROM items
-		WHERE wishlist_id = $1
+		FROM items i
+		INNER JOIN wishlists w on i.wishlist_id = w.id
+		WHERE w.user_id = $1
 		ORDER BY id ASC;
 	`
 
-	rows, err := r.database.Query(ctx, sqlQuery, wishlistId)
+	rows, err := r.database.Query(ctx, sqlQuery, userId)
 
 	if err != nil {
 		return nil, err
@@ -90,14 +92,15 @@ func (r *Repository) SelectAllItems(ctx context.Context, wishlistId int) ([]Item
 	return items, nil
 }
 
-func (r *Repository) UpdateItem(ctx context.Context, item Item) (Item, error) {
+func (r *Repository) UpdateItem(ctx context.Context, item Item, userId int) (Item, error) {
 	sqlQuery := `
-		UPDATE items
+		UPDATE items i
 		SET title = $1, description = $2, url = $3, priority = $4
-		WHERE id = $5 AND wishlist_id = $6
+		FROM wishlists w
+		WHERE i.id = $5 AND i.wishlist_id = w.id AND w.user_id = $6
 	`
 
-	res, err := r.database.Exec(ctx, sqlQuery, item.Title, item.Description, item.URL, item.Priority, item.Id, item.Wishlist_id)
+	res, err := r.database.Exec(ctx, sqlQuery, item.Title, item.Description, item.URL, item.Priority, item.Id, userId)
 	if err != nil {
 		return Item{}, err
 	}
@@ -107,12 +110,13 @@ func (r *Repository) UpdateItem(ctx context.Context, item Item) (Item, error) {
 	return item, nil
 }
 
-func (r *Repository) DeleteItem(ctx context.Context, itemId int, wishlist_id int) error {
+func (r *Repository) DeleteItem(ctx context.Context, itemId int, userId int) error {
 	sqlQuery := `
-		DELETE FROM items
-		WHERE id = $1 AND wishlist_id = $2;
+		DELETE FROM items i
+		USING wishlists w
+		WHERE i.id = $1 AND i.wishlist_id = w.id AND w.user_id = $2;
 	`
-	res, err := r.database.Exec(ctx, sqlQuery, itemId, wishlist_id)
+	res, err := r.database.Exec(ctx, sqlQuery, itemId, userId)
 
 	if err != nil {
 		return err
