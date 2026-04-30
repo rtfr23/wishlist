@@ -15,7 +15,7 @@ type Item struct {
 	Description string
 	URL         string
 	Priority    int
-	IsReserved  int
+	IsReserved  bool
 }
 
 func NewService(rep *Repository) *Service {
@@ -34,8 +34,8 @@ func (s *Service) AddItem(ctx context.Context, item Item, userId int) (int, erro
 	return id, nil
 }
 
-func (s *Service) GetItem(ctx context.Context, itemId int, wishlistId int) (Item, error) {
-	item, err := s.repository.SelectItem(ctx, itemId, wishlistId)
+func (s *Service) GetItem(ctx context.Context, itemId int, wishlistId int, userId int) (Item, error) {
+	item, err := s.repository.SelectItem(ctx, itemId, wishlistId, userId)
 	if err != nil {
 		return Item{}, err
 	}
@@ -43,16 +43,16 @@ func (s *Service) GetItem(ctx context.Context, itemId int, wishlistId int) (Item
 	return item, nil
 }
 
-func (s *Service) GetAllItems(ctx context.Context, wishlistId int) ([]Item, error) {
-	items, err := s.repository.SelectAllItems(ctx, wishlistId)
+func (s *Service) GetAllItems(ctx context.Context, userId int) ([]Item, error) {
+	items, err := s.repository.SelectAllItems(ctx, userId)
 	if err != nil {
 		return nil, err
 	}
 	return items, nil
 }
 
-func (s *Service) UpdateItem(ctx context.Context, item Item) (Item, error) {
-	updatedItem, err := s.repository.UpdateItem(ctx, item)
+func (s *Service) UpdateItem(ctx context.Context, item Item, userId int) (Item, error) {
+	updatedItem, err := s.repository.UpdateItem(ctx, item, userId)
 
 	if err != nil {
 		return Item{}, err
@@ -61,8 +61,8 @@ func (s *Service) UpdateItem(ctx context.Context, item Item) (Item, error) {
 	return updatedItem, nil
 }
 
-func (s *Service) DeleteItem(ctx context.Context, itemId int, wishlistId int) error {
-	if err := s.repository.DeleteItem(ctx, itemId, wishlistId); err != nil {
+func (s *Service) DeleteItem(ctx context.Context, itemId int, userId int) error {
+	if err := s.repository.DeleteItem(ctx, itemId, userId); err != nil {
 		return err
 	}
 
