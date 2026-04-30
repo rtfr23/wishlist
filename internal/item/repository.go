@@ -62,16 +62,16 @@ func (r *Repository) SelectItem(ctx context.Context, itemId int, wishlistId int,
 	return item, nil
 }
 
-func (r *Repository) SelectAllItems(ctx context.Context, userId int) ([]Item, error) {
+func (r *Repository) SelectAllItems(ctx context.Context, wishlistId int, userId int) ([]Item, error) {
 	sqlQuery := `
 		SELECT id, wishlist_id, title, description, url, priority, is_reserved
 		FROM items i
 		INNER JOIN wishlists w on i.wishlist_id = w.id
-		WHERE w.user_id = $1
+		WHERE w.user_id = $1 AND i.wishlist_id = $2
 		ORDER BY id ASC;
 	`
 
-	rows, err := r.database.Query(ctx, sqlQuery, userId)
+	rows, err := r.database.Query(ctx, sqlQuery, userId, wishlistId)
 
 	if err != nil {
 		return nil, err

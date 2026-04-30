@@ -152,3 +152,61 @@ func (i *ItemHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (i *ItemHandler) GetItems(w http.ResponseWriter, r *http.Request) {
+	wishlistStr := mux.Vars(r)["id"]
+	wishlistId, err := strconv.Atoi(wishlistStr)
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
+		return
+	}
+
+	claims, ok := r.Context().Value(middleware.ClaimsKey).(*jwt.RegisteredClaims)
+	if !ok {
+		errDTO := dto.NewErrorDTO(errors.New("Unauthorized"))
+		http.Error(w, errDTO.ToString(), http.StatusUnauthorized)
+		return
+	}
+
+	userId, err := strconv.Atoi(claims.Subject)
+
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusUnauthorized)
+		return
+	}
+
+	items, err := i.itemService.GetAllItems(r.Context(), wishlistId, userId)
+
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+		return
+	}
+
+	itemsDto := make([]dto.ItemDTO, 0, len(items))
+
+	for _, a := range items {
+		itemsDto = append(itemsDto, dto.ItemDTO{
+			Id:          a.Id,
+			Wishlist_id: a.Wishlist_id,
+			Title:       a.Title,
+			Description: a.Description,
+			URL:         a.URL,
+			Priority:    a.Priority,
+		})
+	}
+
+	w.WriteHeader(http.StatusOK)
+	b, err := json.MarshalIndent(itemsDto, "", "\t")
+	if err != nil {
+		errDTO := dto.NewErrorDTO(err)
+		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := w.Write(b); err != nil {
+		return
+	}
+}

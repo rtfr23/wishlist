@@ -43,8 +43,8 @@ func (s *Service) GetItem(ctx context.Context, itemId int, wishlistId int, userI
 	return item, nil
 }
 
-func (s *Service) GetAllItems(ctx context.Context, userId int) ([]Item, error) {
-	items, err := s.repository.SelectAllItems(ctx, userId)
+func (s *Service) GetAllItems(ctx context.Context, wishlistId int, userId int) ([]Item, error) {
+	items, err := s.repository.SelectAllItems(ctx, wishlistId, userId)
 	if err != nil {
 		return nil, err
 	}
