@@ -55,7 +55,7 @@ func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request) {
 		User_id:     userId,
 		Event:       wishlistDto.Event,
 		Description: wishlistDto.Description,
-		Date:        *wishlistDto.Date,
+		Date:        wishlistDto.Date,
 	}
 
 	id, token, err := wh.wishlistService.AddWishlist(r.Context(), wishlist)
@@ -121,7 +121,7 @@ func (wh *WishlistHandler) GetWishlist(w http.ResponseWriter, r *http.Request) {
 		Id:          wishlist.Id,
 		Event:       wishlist.Event,
 		Description: wishlist.Description,
-		Date:        &wishlist.Date,
+		Date:        wishlist.Date,
 		Token:       wishlist.Token,
 	}
 
@@ -171,7 +171,7 @@ func (wh *WishlistHandler) GetWishlists(w http.ResponseWriter, r *http.Request) 
 			Id:          a.Id,
 			Event:       a.Event,
 			Description: a.Description,
-			Date:        &a.Date,
+			Date:        a.Date,
 			Token:       a.Token,
 		})
 	}
@@ -261,14 +261,14 @@ func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request
 		User_id: userId,
 	}
 
-	if patchedWishlistDto.Event != "" {
+	if patchedWishlistDto.Event != nil {
 		patchedWishlist.Event = patchedWishlistDto.Event
 	}
-	if patchedWishlistDto.Description != "" {
+	if patchedWishlistDto.Description != nil {
 		patchedWishlist.Description = patchedWishlistDto.Description
 	}
 	if patchedWishlistDto.Date != nil {
-		patchedWishlist.Date = *patchedWishlistDto.Date
+		patchedWishlist.Date = patchedWishlistDto.Date
 	}
 
 	wishlist, err := wh.wishlistService.UpdateWishlist(r.Context(), patchedWishlist)
@@ -288,7 +288,7 @@ func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request
 		Id:          wishlist.Id,
 		Event:       wishlist.Event,
 		Description: wishlist.Description,
-		Date:        &wishlist.Date,
+		Date:        wishlist.Date,
 	}
 
 	w.WriteHeader(http.StatusOK)

@@ -10,22 +10,22 @@ type Service struct {
 }
 
 type Wishlist struct {
-	Id int
-	User_id int
-	Event string
-	Description string
-	Date time.Time
-	Token string
+	Id          int
+	User_id     int
+	Event       *string
+	Description *string
+	Date        *time.Time
+	Token       string
 }
 
 func NewService(rep *Repository) *Service {
-	return &Service {
+	return &Service{
 		repository: rep,
 	}
 }
 
-func (s *Service)AddWishlist(ctx context.Context, wishlist Wishlist) (int, string, error) {
-	id, token, err := s.repository.InsertWishlist(ctx, wishlist); 
+func (s *Service) AddWishlist(ctx context.Context, wishlist Wishlist) (int, string, error) {
+	id, token, err := s.repository.InsertWishlist(ctx, wishlist)
 	if err != nil {
 		return 0, "", err
 	}
@@ -33,7 +33,7 @@ func (s *Service)AddWishlist(ctx context.Context, wishlist Wishlist) (int, strin
 	return id, token, nil
 }
 
-func (s *Service)GetWishlist(ctx context.Context, wishlistId int, userId int) (Wishlist, error) {
+func (s *Service) GetWishlist(ctx context.Context, wishlistId int, userId int) (Wishlist, error) {
 	wishlist, err := s.repository.SelectWishlist(ctx, wishlistId, userId)
 	if err != nil {
 		return Wishlist{}, err
@@ -41,7 +41,7 @@ func (s *Service)GetWishlist(ctx context.Context, wishlistId int, userId int) (W
 	return wishlist, nil
 }
 
-func (s *Service)GetWishlistWithToken(ctx context.Context, token string) (Wishlist, error) {
+func (s *Service) GetWishlistWithToken(ctx context.Context, token string) (Wishlist, error) {
 	wishlist, err := s.repository.SelectWishlistWithToken(ctx, token)
 	if err != nil {
 		return Wishlist{}, err
@@ -49,7 +49,7 @@ func (s *Service)GetWishlistWithToken(ctx context.Context, token string) (Wishli
 	return wishlist, nil
 }
 
-func (s *Service)GetAllWishlists(ctx context.Context, userId int) ([]Wishlist, error) {
+func (s *Service) GetAllWishlists(ctx context.Context, userId int) ([]Wishlist, error) {
 	wishlists, err := s.repository.SelectAllWishlists(ctx, userId)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (s *Service)GetAllWishlists(ctx context.Context, userId int) ([]Wishlist, e
 	return wishlists, nil
 }
 
-func (s *Service)UpdateWishlist(ctx context.Context, wishlist Wishlist) (Wishlist, error) {
+func (s *Service) UpdateWishlist(ctx context.Context, wishlist Wishlist) (Wishlist, error) {
 	updatedWishlist, err := s.repository.UpdateWishlist(ctx, wishlist)
 
 	if err != nil {
@@ -67,7 +67,7 @@ func (s *Service)UpdateWishlist(ctx context.Context, wishlist Wishlist) (Wishlis
 	return updatedWishlist, nil
 }
 
-func (s *Service)DeleteWishlist(ctx context.Context, wishlistId int, userId int) error {
+func (s *Service) DeleteWishlist(ctx context.Context, wishlistId int, userId int) error {
 	err := s.repository.DeleteWishlist(ctx, wishlistId, userId)
 
 	if err != nil {

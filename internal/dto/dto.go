@@ -17,8 +17,8 @@ type ErrDTO struct {
 
 type WishlistDTO struct {
 	Id          int        `json:"id"`
-	Event       string     `json:"event"`
-	Description string     `json:"desc"`
+	Event       *string    `json:"event"`
+	Description *string    `json:"desc"`
 	Date        *time.Time `json:"date"`
 	Token       string     `json:"token"`
 }
@@ -33,7 +33,7 @@ type ItemDTO struct {
 }
 
 func (w *WishlistDTO) Validate() bool {
-	if w.Event == "" || w.Date == nil {
+	if w.Event == nil || w.Date == nil {
 		return false
 	}
 	return true
