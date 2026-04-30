@@ -61,8 +61,8 @@ func (s *Service) UpdateItem(ctx context.Context, item Item, userId int) (Item, 
 	return updatedItem, nil
 }
 
-func (s *Service) DeleteItem(ctx context.Context, itemId int, userId int) error {
-	if err := s.repository.DeleteItem(ctx, itemId, userId); err != nil {
+func (s *Service) DeleteItem(ctx context.Context, itemId int, wishlistId int, userId int) error {
+	if err := s.repository.DeleteItem(ctx, itemId, wishlistId, userId); err != nil {
 		return err
 	}
 

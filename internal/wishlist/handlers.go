@@ -22,7 +22,7 @@ func NewWishlistHandler(wishlistService *Service) *WishlistHandler {
 	}
 }
 
-func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request){
+func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request) {
 	var wishlistDto dto.WishlistDTO
 	if err := json.NewDecoder(r.Body).Decode(&wishlistDto); err != nil {
 		errDTO := dto.NewErrorDTO(err)
@@ -51,14 +51,14 @@ func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	wishlist := Wishlist {	
-		User_id: userId,
-		Event: wishlistDto.Event,
+	wishlist := Wishlist{
+		User_id:     userId,
+		Event:       wishlistDto.Event,
 		Description: wishlistDto.Description,
-		Date: *wishlistDto.Date,
+		Date:        *wishlistDto.Date,
 	}
 
-	id, token, err := wh.wishlistService.AddWishlist(r.Context(), wishlist); 
+	id, token, err := wh.wishlistService.AddWishlist(r.Context(), wishlist)
 	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
@@ -69,7 +69,7 @@ func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request){
 	wishlist.Id = id
 	wishlist.Token = token
 	b, err := json.MarshalIndent(wishlist, "", "\t")
-	if err != nil{
+	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
 		return
@@ -80,7 +80,7 @@ func (wh *WishlistHandler) AddWishlist(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func (wh *WishlistHandler) GetWishlist(w http.ResponseWriter, r *http.Request){
+func (wh *WishlistHandler) GetWishlist(w http.ResponseWriter, r *http.Request) {
 	wishlistStr := mux.Vars(r)["id"]
 	wishlistId, err := strconv.Atoi(wishlistStr)
 	if err != nil {
@@ -117,18 +117,18 @@ func (wh *WishlistHandler) GetWishlist(w http.ResponseWriter, r *http.Request){
 		}
 	}
 
-	wishlistDto := dto.WishlistDTO {
-		Id: wishlist.Id,
-		Event: wishlist.Event,
+	wishlistDto := dto.WishlistDTO{
+		Id:          wishlist.Id,
+		Event:       wishlist.Event,
 		Description: wishlist.Description,
-		Date: &wishlist.Date,
-		Token: wishlist.Token,
+		Date:        &wishlist.Date,
+		Token:       wishlist.Token,
 	}
 
 	w.WriteHeader(http.StatusOK)
 
 	b, err := json.MarshalIndent(wishlistDto, "", "\t")
-	if err != nil{
+	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
 		return
@@ -140,7 +140,7 @@ func (wh *WishlistHandler) GetWishlist(w http.ResponseWriter, r *http.Request){
 
 }
 
-func (wh *WishlistHandler) GetWishlists(w http.ResponseWriter, r *http.Request){
+func (wh *WishlistHandler) GetWishlists(w http.ResponseWriter, r *http.Request) {
 	claims, ok := r.Context().Value(middleware.ClaimsKey).(*jwt.RegisteredClaims)
 	if !ok {
 		errDTO := dto.NewErrorDTO(errors.New("Unauthorized"))
@@ -168,18 +168,18 @@ func (wh *WishlistHandler) GetWishlists(w http.ResponseWriter, r *http.Request){
 
 	for _, a := range wishlists {
 		wishlistsDto = append(wishlistsDto, dto.WishlistDTO{
-			Id: a.Id,
-			Event: a.Event,
+			Id:          a.Id,
+			Event:       a.Event,
 			Description: a.Description,
-			Date: &a.Date,
-			Token: a.Token,
+			Date:        &a.Date,
+			Token:       a.Token,
 		})
 	}
 
 	w.WriteHeader(http.StatusOK)
 
 	b, err := json.MarshalIndent(wishlistsDto, "", "\t")
-	if err != nil{
+	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
 		return
@@ -191,24 +191,24 @@ func (wh *WishlistHandler) GetWishlists(w http.ResponseWriter, r *http.Request){
 
 }
 
-func (wh *WishlistHandler)GetWishlistWithToken(w http.ResponseWriter, r *http.Request){
+func (wh *WishlistHandler) GetWishlistWithToken(w http.ResponseWriter, r *http.Request) {
 	token := mux.Vars(r)["token"]
-	
+
 	if token == "" {
 		errDTO := dto.NewErrorDTO(errors.New("Empty token"))
 		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
 		return
 	}
 
-	wishlist, err := wh.wishlistService.GetWishlistWithToken(r.Context(), token); 
+	wishlist, err := wh.wishlistService.GetWishlistWithToken(r.Context(), token)
 	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusNotFound)
 		return
-	} 
+	}
 
 	b, err := json.MarshalIndent(wishlist, "", "\t")
-	if err != nil{
+	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		if errors.Is(err, ErrWishlistNotFound) {
 			http.Error(w, errDTO.ToString(), http.StatusNotFound)
@@ -217,7 +217,7 @@ func (wh *WishlistHandler)GetWishlistWithToken(w http.ResponseWriter, r *http.Re
 			http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
 			return
 		}
-		
+
 	}
 
 	if _, err := w.Write(b); err != nil {
@@ -225,7 +225,7 @@ func (wh *WishlistHandler)GetWishlistWithToken(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request){
+func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request) {
 	wishlistStr := mux.Vars(r)["id"]
 	wishlistId, err := strconv.Atoi(wishlistStr)
 	if err != nil {
@@ -233,9 +233,9 @@ func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request
 		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
 		return
 	}
-	
+
 	var patchedWishlistDto dto.WishlistDTO
-	if err := json.NewDecoder(r.Body).Decode(&patchedWishlistDto); err != nil{
+	if err := json.NewDecoder(r.Body).Decode(&patchedWishlistDto); err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
 		return
@@ -256,9 +256,8 @@ func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	
 	patchedWishlist := Wishlist{
-		Id: wishlistId,
+		Id:      wishlistId,
 		User_id: userId,
 	}
 
@@ -285,17 +284,17 @@ func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	wishlistDto := dto.WishlistDTO {
-		Id: wishlist.Id,
-		Event: wishlist.Event,
+	wishlistDto := dto.WishlistDTO{
+		Id:          wishlist.Id,
+		Event:       wishlist.Event,
 		Description: wishlist.Description,
-		Date: &wishlist.Date,
+		Date:        &wishlist.Date,
 	}
 
 	w.WriteHeader(http.StatusOK)
 
 	b, err := json.MarshalIndent(wishlistDto, "", "\t")
-	if err != nil{
+	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
 		return
@@ -307,7 +306,7 @@ func (wh *WishlistHandler) UpdateWishlist(w http.ResponseWriter, r *http.Request
 
 }
 
-func (wh *WishlistHandler) DeleteWishlist(w http.ResponseWriter, r *http.Request){
+func (wh *WishlistHandler) DeleteWishlist(w http.ResponseWriter, r *http.Request) {
 	wishlistStr := mux.Vars(r)["id"]
 	wishlistId, err := strconv.Atoi(wishlistStr)
 	if err != nil {
@@ -315,7 +314,7 @@ func (wh *WishlistHandler) DeleteWishlist(w http.ResponseWriter, r *http.Request
 		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
 		return
 	}
-	
+
 	claims, ok := r.Context().Value(middleware.ClaimsKey).(*jwt.RegisteredClaims)
 	if !ok {
 		errDTO := dto.NewErrorDTO(errors.New("Unauthorized"))
@@ -336,7 +335,7 @@ func (wh *WishlistHandler) DeleteWishlist(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		errDTO := dto.NewErrorDTO(err)
 		if errors.Is(err, ErrWishlistNotFound) {
-			http.Error(w, errDTO.ToString(), http.StatusNoContent)
+			http.Error(w, errDTO.ToString(), http.StatusNotFound)
 			return
 		} else {
 			http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
