@@ -155,6 +155,7 @@ func (i *ItemHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 		Description: item.Description,
 		URL:         item.URL,
 		Priority:    item.Priority,
+		IsReserved:  item.IsReserved,
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -212,6 +213,7 @@ func (i *ItemHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 			Description: a.Description,
 			URL:         a.URL,
 			Priority:    a.Priority,
+			IsReserved:  a.IsReserved,
 		})
 	}
 

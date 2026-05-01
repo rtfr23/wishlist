@@ -31,6 +31,7 @@ type ItemDTO struct {
 	Description *string `json:"desc"`
 	URL         *string `json:"url"`
 	Priority    *int    `json:"priority"`
+	IsReserved  bool
 }
 
 func (w *WishlistDTO) Validate() bool {

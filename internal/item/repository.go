@@ -39,7 +39,7 @@ func (r *Repository) InsertItem(ctx context.Context, item Item, userId int) (int
 
 func (r *Repository) SelectItem(ctx context.Context, itemId int, wishlistId int, userId int) (Item, error) {
 	sqlQuery := `
-		SELECT id, wishlist_id, title, description, url, priority, is_reserved
+		SELECT i.id, wishlist_id, title, i.description, url, priority, is_reserved
 		FROM items i
 		INNER JOIN wishlists w on i.wishlist_id = w.id
 		WHERE i.id = $1 AND i.wishlist_id = $2 AND w.user_id = $3;
