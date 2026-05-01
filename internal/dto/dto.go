@@ -37,6 +37,17 @@ func (w *WishlistDTO) Validate() bool {
 	if w.Event == nil || w.Date == nil {
 		return false
 	}
+	if w.Description != nil && len(*w.Description) > 1024 {
+		return false
+	}
+
+	if len(*w.Event) > 256 {
+		return false
+	}
+
+	if w.Date.Before(time.Now()) {
+		return false
+	}
 	return true
 }
 
