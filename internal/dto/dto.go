@@ -2,6 +2,7 @@ package dto
 
 import (
 	"encoding/json"
+	"net/mail"
 	"time"
 )
 
@@ -51,6 +52,13 @@ func (u *UserDTO) Validate() bool {
 		return false
 	}
 
+	if _, err := mail.ParseAddress(u.Email); err != nil {
+		return false
+	}
+
+	if len(u.Password) < 4 {
+		return false
+	}
 	return true
 }
 
