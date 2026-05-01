@@ -55,6 +55,19 @@ func (i *ItemDTO) Validate() bool {
 	if i.Title == nil {
 		return false
 	}
+
+	if i.Description != nil && len(*i.Description) > 1024 {
+		return false
+	}
+
+	if i.URL != nil && len(*i.URL) > 512 {
+		return false
+	}
+
+	if i.Priority != nil && *i.Priority < 0 {
+		return false
+	}
+
 	return true
 }
 
